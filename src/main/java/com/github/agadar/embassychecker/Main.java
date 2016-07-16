@@ -2,6 +2,7 @@ package com.github.agadar.embassychecker;
 
 import com.github.agadar.nsapi.NSAPI;
 import com.github.agadar.nsapi.domain.region.Region;
+import com.github.agadar.nsapi.domain.shared.Happening;
 import com.github.agadar.nsapi.enums.shard.RegionShard;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class Main
 {
     /** Name of the region whose embassy regions to check. */
-    private final static String Region = "the western isles";
+    private final static String MainRegionName = "the western isles";
     
     /** Whether or not to check the RMB activity of each region. */
     private final static boolean CheckRmbActivity = true;
@@ -28,7 +29,7 @@ public class Main
     private final static int MaxDaysSinceLastRmbMsg = 30;
     
     /** Whether or not to check the age of each region. */
-    private final static boolean CheckRegionFounded = false;
+    private final static boolean CheckRegionFounded = true;
     
     /**
      * The minimum number of days since a region may have been founded.
@@ -74,10 +75,10 @@ public class Main
                 new RegionShard[shardsToRetrieveLst.size()]);
         
         // Retrieve embassies of the specified region.
-        Region r = NSAPI.region(Region).shards(RegionShard.Embassies).execute();
+        Region MainRegion = NSAPI.region(MainRegionName).shards(RegionShard.Embassies).execute();
         
         // Null-check on the region.
-        if (r == null)
+        if (MainRegion == null)
         {
             throw new IllegalArgumentException("Region does not exist!");
         }
@@ -85,7 +86,7 @@ public class Main
         // Extract all region names from embassies that aren't closing, rejected,
         // or denied, because we don't care about those.
         final List<String> embassyRegions = new ArrayList<>();
-        r.Embassies.forEach(embassy -> 
+        MainRegion.Embassies.forEach(embassy -> 
         {
             if (embassy.Status == null || !(embassy.Status.equals("closing") || 
                 embassy.Status.equals("rejected") || embassy.Status.equals("denied")))
@@ -99,15 +100,13 @@ public class Main
         final List<Region> regions = new ArrayList<>();
         
         // Iterate over retrieved region names, retrieving the regions.
-        //for (final String region : embassyRegions)
-        for (int i = 0; i < 40; i++)
+        for (final String region : embassyRegions)
         {
-            String region = embassyRegions.get(i);
             // Null check to make sure the region didn't CTE in the meantime.
-            if ((r = NSAPI.region(region).shards(shardsToRetrieve).execute()) != null)
+            if ((MainRegion = NSAPI.region(region).shards(shardsToRetrieve).execute()) != null)
             {
                 // Add the region to the list.
-                regions.add(r);
+                regions.add(MainRegion);
             }
         }
         
@@ -120,22 +119,19 @@ public class Main
         // Do region founded check.
         if (CheckRegionFounded)
         {
-            throw new UnsupportedOperationException();
+            checkRegionFounded(regions);
         }
     }
     
     /**
-     * Checks the RMB activity of the given regions
+     * Checks the RMB activity of the given regions, and prints results.
      * 
      * @param region the regions of which the RMB activity to check
      */
     private static void checkRmbActivity(List<Region> regions)
     {
-         // List that will contain regions that haven't had RMB posts in x days.
+        // List that will contain regions that haven't had RMB posts in x days.
         final List<RegionLastMsg> regionLastMsgs = new ArrayList<>();
-        
-        // MaxDaysSinceLastRmbMsg converted to seconds.
-        final long maxMsSinceLastRmbMsg = TimeUnit.DAYS.toSeconds(MaxDaysSinceLastRmbMsg);
         
         // Iterate over the regions, doing the check.
         for (Region region : regions)
@@ -143,7 +139,7 @@ public class Main
             // Null/empty check on retrieved messages.
             if (region.RegionalMessages == null || region.RegionalMessages.isEmpty())
             {
-                regionLastMsgs.add(new RegionLastMsg(Region));
+                regionLastMsgs.add(new RegionLastMsg(region.Name));
                 continue;
             }
 
@@ -153,17 +149,66 @@ public class Main
                     .size() - 1).Timestamp;
             final long diff = Now - msgTimeStamp;
 
-            if (diff >= maxMsSinceLastRmbMsg)
+            if (diff >= TimeUnit.DAYS.toSeconds(MaxDaysSinceLastRmbMsg))
             {
                 regionLastMsgs.add(new RegionLastMsg(region.Name, diff));
             }
         }
         
         // Now sort the list and print it out.
-        System.out.println();
-        System.out.println("-------Regions in which no RMB message is posted for " 
-                           + MaxDaysSinceLastRmbMsg + " or more days-------");
         Collections.sort(regionLastMsgs);
+        System.out.println();
+        System.out.println("-------Regions in which no RMB messages were "
+                           + "posted during the last " + MaxDaysSinceLastRmbMsg
+                           + " days-------");
+        System.out.println("Total regions found: " + regionLastMsgs.size());
         regionLastMsgs.forEach(regionLastMsg -> System.out.println(regionLastMsg));
+    }
+    
+    /**
+     * Checks the founding dates of the given regions, and prints results.
+     * 
+     * @param regions the regions of which the founding dates to check
+     */
+    private static void checkRegionFounded(List<Region> regions)
+    {
+        // List that will contain regions that haven't had RMB posts in x days.
+        final List<RegionFounded> regionFoundeds = new ArrayList<>();
+
+        // Iterate over the regions, doing the check.
+        for (Region region : regions)
+        {       
+            // Null/empty check on retrieved messages.
+            if (region.History == null || region.History.isEmpty())
+            {
+                continue;
+            }
+            
+            // Check if the very last item is the 'founded' message. If not, continue.
+            final Happening lastHapp = region.History.get(region.History.size() - 1);
+            
+            if (!lastHapp.Description.contains("Region founded by "))
+            {
+                continue;
+            }
+
+            // Check whether the time between now and when the region was founded
+            // is less than the minMsSinceFounded. If so, add to regionFoundeds.
+            final long foundedTimeStamp = lastHapp.Timestamp;
+            final long diff = Now - foundedTimeStamp;
+
+            if (diff < TimeUnit.DAYS.toSeconds(MinDaysSinceFounded))
+            {
+                regionFoundeds.add(new RegionFounded(region.Name, diff));
+            }
+        }
+        
+        // Now sort the list and print it out.
+        Collections.sort(regionFoundeds);
+        System.out.println();
+        System.out.println("-------Regions that were founded less than "
+                           + MinDaysSinceFounded + " days ago-------");
+        System.out.println("Total regions found: " + regionFoundeds.size());
+        regionFoundeds.forEach(regionLastMsg -> System.out.println(regionLastMsg));
     }
 }

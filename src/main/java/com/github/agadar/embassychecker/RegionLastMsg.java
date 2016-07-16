@@ -78,7 +78,7 @@ public final class RegionLastMsg implements Comparable<RegionLastMsg>
         
         if (diffInDays != Integer.MAX_VALUE)
         {
-            help += String.format("%s day(s) ago.", diffInDays);
+            help += String.format("%s days ago.", diffInDays);
         }
         else
         {
