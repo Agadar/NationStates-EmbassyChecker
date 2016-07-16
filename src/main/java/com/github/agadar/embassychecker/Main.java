@@ -5,6 +5,7 @@ import com.github.agadar.nsapi.domain.region.Region;
 import com.github.agadar.nsapi.domain.shared.Happening;
 import com.github.agadar.nsapi.enums.shard.RegionShard;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +37,14 @@ public class Main
      */
     private final static int MinDaysSinceFounded = 90;
     
+    /** Whether or not to check the region's tags. */
+    private final static boolean CheckRegionTags = true;
+    
+    /** The tags to check and warn for. */
+    private final static String[] TagsToCheck = new String[] { "Raider", "Mercenary" };
+    
     /** The user agent for this program. */
-    private final static String UserAgent = "Agadar's script for checking embassy regions";
+    private final static String UserAgent = "Agadar's Embassy Checker (https://github.com/Agadar/NationStates-EmbassyChecker)";
     
     // Timestamp in seconds of now.
     private final static long Now = System.currentTimeMillis() / 1000;
@@ -48,7 +55,7 @@ public class Main
     public static void main(String[] args)
     {
         // Ensure at least one check is being done.
-        if (!CheckRmbActivity && !CheckRegionFounded)
+        if (!CheckRmbActivity && !CheckRegionFounded && !CheckRegionTags)
         {
             throw new IllegalArgumentException("No checks enabled!");
         }
@@ -69,6 +76,11 @@ public class Main
         if (CheckRegionFounded)
         {
             shardsToRetrieveLst.add(RegionShard.History);
+        }
+        
+        if (CheckRegionTags)
+        {
+            shardsToRetrieveLst.add(RegionShard.Tags);
         }
         
         final RegionShard[] shardsToRetrieve = shardsToRetrieveLst.toArray(
@@ -120,6 +132,12 @@ public class Main
         if (CheckRegionFounded)
         {
             checkRegionFounded(regions);
+        }
+        
+        // Do tags check.
+        if (CheckRegionTags)
+        {
+            checkRegionTags(regions);
         }
     }
     
@@ -210,5 +228,43 @@ public class Main
                            + MinDaysSinceFounded + " days ago-------");
         System.out.println("Total regions found: " + regionFoundeds.size());
         regionFoundeds.forEach(regionLastMsg -> System.out.println(regionLastMsg));
+    }
+    
+    /**
+     * Checks the tags of the given regions, and prints results.
+     * 
+     * @param regions the regions of which the tags to check
+     */
+    private static void checkRegionTags(List<Region> regions)
+    {
+        // List of regions that have one or more of the tags
+        List<String> regionsWithTags = new ArrayList<>();
+        
+        // Array to list.
+        List<String> TagsToCheckLst = Arrays.asList(TagsToCheck);
+        
+        // Iterate over the regions, doing the check.
+        for (Region region : regions)
+        {
+            // Null/empty check on retrieved messages.
+            if (region.Tags == null || region.Tags.isEmpty())
+            {
+                continue;
+            }
+            
+            // Check whether the region has any of the tags, and if so, add the
+            // region name to regionsWithTags.
+            if (!Collections.disjoint(region.Tags, TagsToCheckLst))
+            {
+                regionsWithTags.add(region.Name);
+            }
+        }
+        
+        // Now sort the list and print it out.
+        Collections.sort(regionsWithTags);
+        System.out.println();
+        System.out.println("-------Regions with one or more of the specified tags-------");
+        System.out.println("Total regions found: " + regionsWithTags.size());
+        regionsWithTags.forEach(regionName -> System.out.println(regionName));
     }
 }
