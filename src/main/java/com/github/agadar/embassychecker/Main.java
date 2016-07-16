@@ -19,24 +19,27 @@ public class Main
     private final static String Region = "the western isles";
     
     /** Whether or not to check the RMB activity of each region. */
-    private final static boolean checkRmbActivity = true;
+    private final static boolean CheckRmbActivity = true;
     
     /** 
      * The maximum number of days since the last message on a region's 
      * message board before that region is considered inactive.
      */
-    private final static int maxDaysSinceLastRmbMsg = 30;
+    private final static int MaxDaysSinceLastRmbMsg = 30;
     
     /** Whether or not to check the age of each region. */
-    private final static boolean checkRegionFounded = true;
+    private final static boolean CheckRegionFounded = false;
     
     /**
      * The minimum number of days since a region may have been founded.
      */
-    private final static int minDaysSinceFounded = 90;
+    private final static int MinDaysSinceFounded = 90;
     
     /** The user agent for this program. */
-    private final static String USER_AGENT = "Agadar's script for checking RMB activity of embassy regions";
+    private final static String UserAgent = "Agadar's script for checking embassy regions";
+    
+    // Timestamp in seconds of now.
+    private final static long Now = System.currentTimeMillis() / 1000;
     
     /**
      * @param args the command line arguments
@@ -44,30 +47,34 @@ public class Main
     public static void main(String[] args)
     {
         // Ensure at least one check is being done.
-        if (!checkRmbActivity && !checkRegionFounded)
+        if (!CheckRmbActivity && !CheckRegionFounded)
         {
             throw new IllegalArgumentException("No checks enabled!");
         }
         
         // Set User Agent.
-        NSAPI.setUserAgent(USER_AGENT);
+        NSAPI.setUserAgent(UserAgent);
         
-        // Check what shards to retrieve, according to what checks we want to do.
-        final List<RegionShard> shards = new ArrayList<>();
+        // Check what shards to retrieve from each embassy region, according to 
+        // what checks we want to do.
+        final List<RegionShard> shardsToRetrieveLst = new ArrayList<>();
+        shardsToRetrieveLst.add(RegionShard.Name);
         
-        if (checkRmbActivity)
+        if (CheckRmbActivity)
         {
-            shards.add(RegionShard.Embassies);
+            shardsToRetrieveLst.add(RegionShard.RegionalMessages);
         }
         
-        if (checkRegionFounded)
+        if (CheckRegionFounded)
         {
-            shards.add(RegionShard.History);
+            shardsToRetrieveLst.add(RegionShard.History);
         }
         
-        // Retrieve all relevant data of the specified region.
-        Region r = NSAPI.region(Region).shards(shards.toArray(
-                new RegionShard[shards.size()])).execute();
+        final RegionShard[] shardsToRetrieve = shardsToRetrieveLst.toArray(
+                new RegionShard[shardsToRetrieveLst.size()]);
+        
+        // Retrieve embassies of the specified region.
+        Region r = NSAPI.region(Region).shards(RegionShard.Embassies).execute();
         
         // Null-check on the region.
         if (r == null)
@@ -75,71 +82,88 @@ public class Main
             throw new IllegalArgumentException("Region does not exist!");
         }
         
-        // Extract all region names from valid embassies.
+        // Extract all region names from embassies that aren't closing, rejected,
+        // or denied, because we don't care about those.
         final List<String> embassyRegions = new ArrayList<>();
         r.Embassies.forEach(embassy -> 
         {
-            if (embassy.Status == null)
+            if (embassy.Status == null || !(embassy.Status.equals("closing") || 
+                embassy.Status.equals("rejected") || embassy.Status.equals("denied")))
             {
                 embassyRegions.add(embassy.RegionName);
             }
         });
-        System.out.println("Checking " + embassyRegions.size() + " embassy regions...");
+        System.out.println("Checking " + embassyRegions.size() + " regions...");
         
-        // List that will contain regions that haven't had RMB posts in a month.
+        // The retrieved regions.
+        final List<Region> regions = new ArrayList<>();
+        
+        // Iterate over retrieved region names, retrieving the regions.
+        //for (final String region : embassyRegions)
+        for (int i = 0; i < 40; i++)
+        {
+            String region = embassyRegions.get(i);
+            // Null check to make sure the region didn't CTE in the meantime.
+            if ((r = NSAPI.region(region).shards(shardsToRetrieve).execute()) != null)
+            {
+                // Add the region to the list.
+                regions.add(r);
+            }
+        }
+        
+        // Do RMB activity check.
+        if (CheckRmbActivity)
+        {           
+            checkRmbActivity(regions);
+        }
+        
+        // Do region founded check.
+        if (CheckRegionFounded)
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    /**
+     * Checks the RMB activity of the given regions
+     * 
+     * @param region the regions of which the RMB activity to check
+     */
+    private static void checkRmbActivity(List<Region> regions)
+    {
+         // List that will contain regions that haven't had RMB posts in x days.
         final List<RegionLastMsg> regionLastMsgs = new ArrayList<>();
         
-        // maxDaysSinceLastRmbMsg converted to seconds.
-        final long maxMsSinceLastRmbMsg = TimeUnit.DAYS.toSeconds(maxDaysSinceLastRmbMsg);
+        // MaxDaysSinceLastRmbMsg converted to seconds.
+        final long maxMsSinceLastRmbMsg = TimeUnit.DAYS.toSeconds(MaxDaysSinceLastRmbMsg);
         
-        // Timestamp in seconds of now.
-        final long now = System.currentTimeMillis() / 1000;
-        
-        // Iterate over retrieved region names.
-        for (final String region : embassyRegions)
-        {
-            // Null check to make sure the region didn't CTE in the meantime.
-            if ((r = NSAPI.region(region).shards(RegionShard.RegionalMessages).execute()) == null)
+        // Iterate over the regions, doing the check.
+        for (Region region : regions)
+        {       
+            // Null/empty check on retrieved messages.
+            if (region.RegionalMessages == null || region.RegionalMessages.isEmpty())
             {
+                regionLastMsgs.add(new RegionLastMsg(Region));
                 continue;
             }
-            
-            if (checkRmbActivity)
-            {           
-                // Null/empty check on retrieved messages.
-                if (r.RegionalMessages == null || r.RegionalMessages.isEmpty())
-                {
-                    regionLastMsgs.add(new RegionLastMsg(region));
-                    continue;
-                }
 
-                // Check whether the time between now and when the last posted RMB
-                // message is more than the maxMsSinceLastRmbMsg. If so, add to regionLastMsgs.
-                final long msgTimeStamp = r.RegionalMessages.get(r.RegionalMessages
-                        .size() - 1).Timestamp;
-                final long diff = now - msgTimeStamp;
+            // Check whether the time between now and when the last posted RMB
+            // message is more than the maxMsSinceLastRmbMsg. If so, add to regionLastMsgs.
+            final long msgTimeStamp = region.RegionalMessages.get(region.RegionalMessages
+                    .size() - 1).Timestamp;
+            final long diff = Now - msgTimeStamp;
 
-                if (diff >= maxMsSinceLastRmbMsg)
-                {
-                    regionLastMsgs.add(new RegionLastMsg(region, diff));
-                }
+            if (diff >= maxMsSinceLastRmbMsg)
+            {
+                regionLastMsgs.add(new RegionLastMsg(region.Name, diff));
             }
         }
         
         // Now sort the list and print it out.
         System.out.println();
-        System.out.println("------ RESULTS ------");
+        System.out.println("-------Regions in which no RMB message is posted for " 
+                           + MaxDaysSinceLastRmbMsg + " or more days-------");
         Collections.sort(regionLastMsgs);
-        regionLastMsgs.forEach(regionLastMsg -> System.out.println(regionLastMsg));        
-    }
-    
-    /**
-     * Checks the RMB activity of the given region.
-     * 
-     * @param region the region of which the RMB activity to check
-     */
-    private static void checkRmbActivity(Region r)
-    {
-        
+        regionLastMsgs.forEach(regionLastMsg -> System.out.println(regionLastMsg));
     }
 }
