@@ -1,4 +1,4 @@
-package com.github.agadar.testproject;
+package com.github.agadar.embassychecker;
 
 import java.util.concurrent.TimeUnit;
 
