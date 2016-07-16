@@ -5,10 +5,10 @@
     <!-- General properties -->
     <groupId>com.github.agadar</groupId>
     <artifactId>nationstates-embassychecker</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>   
     <name>NationStates Embassy Checker</name>
-    <description>Prints a list of inactive regions which a specified region has embassies with.</description>
+    <description>Reports on a region's embassies with unwanted, other regions.</description>
     <url>https://github.com/Agadar/NationStates-Telegrammer</url>
     
     <!-- License -->
