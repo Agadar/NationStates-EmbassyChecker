@@ -179,7 +179,7 @@ public class Main
         System.out.println("-------Regions in which no RMB messages were "
                            + "posted during the last " + MaxDaysSinceLastRmbMsg
                            + " days-------");
-        System.out.println("Total regions found: " + regionLastMsgs.size());
+        System.out.println("Total regions found: " + regionLastMsgs.size() + ".");
         regionLastMsgs.forEach(regionLastMsg -> System.out.println(regionLastMsg));
     }
     
@@ -226,7 +226,7 @@ public class Main
         System.out.println();
         System.out.println("-------Regions that were founded less than "
                            + MinDaysSinceFounded + " days ago-------");
-        System.out.println("Total regions found: " + regionFoundeds.size());
+        System.out.println("Total regions found: " + regionFoundeds.size() + ".");
         regionFoundeds.forEach(regionLastMsg -> System.out.println(regionLastMsg));
     }
     
@@ -238,10 +238,10 @@ public class Main
     private static void checkRegionTags(List<Region> regions)
     {
         // List of regions that have one or more of the tags
-        List<String> regionsWithTags = new ArrayList<>();
+        final List<RegionWithTags> regionsWithTags = new ArrayList<>();
         
         // Array to list.
-        List<String> TagsToCheckLst = Arrays.asList(TagsToCheck);
+        final List<String> TagsToCheckLst = Arrays.asList(TagsToCheck);
         
         // Iterate over the regions, doing the check.
         for (Region region : regions)
@@ -252,11 +252,22 @@ public class Main
                 continue;
             }
             
-            // Check whether the region has any of the tags, and if so, add the
-            // region name to regionsWithTags.
-            if (!Collections.disjoint(region.Tags, TagsToCheckLst))
+            // Found tags in this region's tags.
+            final List<String> foundTags = new ArrayList<>();
+            
+            // For each tag to check, check if the region has it. If so, add it to foundTags.
+            for (String tagToCheck : TagsToCheckLst)
             {
-                regionsWithTags.add(region.Name);
+                if (region.Tags.contains(tagToCheck))
+                {
+                    foundTags.add(tagToCheck);
+                }
+            }
+            
+            // If any of the specified tags were found, create an entry in regionsWithTags.
+            if (foundTags.size() > 0)
+            {
+                regionsWithTags.add(new RegionWithTags(region.Name, foundTags));
             }
         }
         
@@ -264,7 +275,7 @@ public class Main
         Collections.sort(regionsWithTags);
         System.out.println();
         System.out.println("-------Regions with one or more of the specified tags-------");
-        System.out.println("Total regions found: " + regionsWithTags.size());
-        regionsWithTags.forEach(regionName -> System.out.println(regionName));
+        System.out.println("Total regions found: " + regionsWithTags.size() + ".");
+        regionsWithTags.forEach(regionWithTag -> System.out.println(regionWithTag));
     }
 }
