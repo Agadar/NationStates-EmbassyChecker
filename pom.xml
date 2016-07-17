@@ -6,10 +6,10 @@
     <groupId>com.github.agadar</groupId>
     <artifactId>nationstates-embassychecker</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>   
+    <packaging>jar</packaging>
     <name>NationStates Embassy Checker</name>
-    <description>Reports on a region's embassies with unwanted, other regions.</description>
-    <url>https://github.com/Agadar/NationStates-Telegrammer</url>
+    <description>Reports on a specific region's embassy regions that do not meet specified criteria.</description>
+    <url>https://github.com/Agadar/NationStates-EmbassyChecker</url>
     
     <!-- License -->
     <licenses>
