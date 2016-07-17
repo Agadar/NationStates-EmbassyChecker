@@ -2,8 +2,6 @@ package com.github.agadar.embassychecker;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -14,14 +12,16 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
 public class EmbassyCheckerForm extends javax.swing.JFrame
 {
-
+    /** The controller this form uses. */
+    private final EmbassyCheckerController controller;
+    
     /**
      * Creates new form EmbassyCheckerForm
      */
     public EmbassyCheckerForm()
     {
         initComponents();
-        EmbassyCheckerController.init(this);
+        controller = new EmbassyCheckerController(this);
     }
 
     /**
@@ -291,7 +291,7 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
      */
     private void ChkbxRmbActivityActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_ChkbxRmbActivityActionPerformed
     {//GEN-HEADEREND:event_ChkbxRmbActivityActionPerformed
-        SpinnerRmbActivity.setEnabled(!SpinnerRmbActivity.isEnabled());
+        SpinnerRmbActivity.setEnabled(ChkbxRmbActivity.isSelected());
         MaybeDisableBtnStart();
     }//GEN-LAST:event_ChkbxRmbActivityActionPerformed
 
@@ -303,7 +303,7 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
      */
     private void ChkbxRegionAgeActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_ChkbxRegionAgeActionPerformed
     {//GEN-HEADEREND:event_ChkbxRegionAgeActionPerformed
-        SpinnerRegionAge.setEnabled(!SpinnerRegionAge.isEnabled());
+        SpinnerRegionAge.setEnabled(ChkbxRegionAge.isSelected());
         MaybeDisableBtnStart();
     }//GEN-LAST:event_ChkbxRegionAgeActionPerformed
 
@@ -315,13 +315,12 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
      */
     private void ChkbxTagsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_ChkbxTagsActionPerformed
     {//GEN-HEADEREND:event_ChkbxTagsActionPerformed
-        TxtFieldTags.setEditable(!TxtFieldTags.isEditable());
+        TxtFieldTags.setEditable(ChkbxTags.isSelected());
         MaybeDisableBtnStart();
     }//GEN-LAST:event_ChkbxTagsActionPerformed
 
     /**
-     * Called when start button is clicked. Gathers and verifies the necessary
-     * variables and sends them to the control.
+     * Called when start button is clicked.
      * 
      * @param evt 
      */
@@ -334,27 +333,17 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
         final boolean checkRegionFounded = ChkbxRegionAge.isSelected();
         final int minDaysSinceFounded = (int) SpinnerRegionAge.getValue();
         final boolean checkRegionTags = ChkbxTags.isSelected();
-        final String[] split = TxtFieldTags.getText().split(",");
+        final String[] split = TxtFieldTags.getText().trim().split(",");
         final String[] tags = new String[split.length];
         for (int i = 0; i < split.length; i++)
         {
             tags[i] = split[i].trim();
         }
-            
-        // Create worker thread and start it.
-        new Thread(() ->
-        {
-            try
-            {
-                EmbassyCheckerController.buildReport(mainRegionName,
-                    checkRmbActivity, maxDaysSinceLastRmbMsg, checkRegionFounded,
-                        minDaysSinceFounded, checkRegionTags, tags);
-            } 
-            catch (Exception ex)
-            {
-                JOptionPane.showMessageDialog(new JFrame(), ex.getMessage(), "An Error Occured", JOptionPane.ERROR_MESSAGE);
-            }
-        }).start();
+        
+        // Call the controller
+        controller.startReporting(mainRegionName, checkRmbActivity,
+                                  maxDaysSinceLastRmbMsg, checkRegionFounded,
+                                  minDaysSinceFounded, checkRegionTags, tags);
     }//GEN-LAST:event_BtnStartActionPerformed
 
     /**
@@ -379,8 +368,8 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
 
             /* Create and display the form */
             java.awt.EventQueue.invokeLater(() -> 
-                    {
-                        new EmbassyCheckerForm().setVisible(true);
+            {
+                new EmbassyCheckerForm().setVisible(true);
             });
         }
         catch (ClassNotFoundException | InstantiationException |
@@ -394,9 +383,9 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     protected javax.swing.JButton BtnStart;
-    private javax.swing.JCheckBox ChkbxRegionAge;
-    private javax.swing.JCheckBox ChkbxRmbActivity;
-    private javax.swing.JCheckBox ChkbxTags;
+    protected javax.swing.JCheckBox ChkbxRegionAge;
+    protected javax.swing.JCheckBox ChkbxRmbActivity;
+    protected javax.swing.JCheckBox ChkbxTags;
     private javax.swing.JLabel LblRegionAge;
     private javax.swing.JLabel LblRmbActivity;
     private javax.swing.JLabel LblTags;
@@ -405,11 +394,11 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
     private javax.swing.JPanel PanelRegionAge;
     private javax.swing.JPanel PanelReport;
     private javax.swing.JPanel PanelTags;
-    private javax.swing.JSpinner SpinnerRegionAge;
-    private javax.swing.JSpinner SpinnerRmbActivity;
+    protected javax.swing.JSpinner SpinnerRegionAge;
+    protected javax.swing.JSpinner SpinnerRmbActivity;
     protected javax.swing.JTextArea TxtAreaReport;
-    private javax.swing.JTextField TxtFieldRegionName;
-    private javax.swing.JTextField TxtFieldTags;
+    protected javax.swing.JTextField TxtFieldRegionName;
+    protected javax.swing.JTextField TxtFieldTags;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }
