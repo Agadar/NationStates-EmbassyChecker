@@ -6,22 +6,22 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 /**
- * EmbassyCheckerController form for this application.
+ * EmbassyCheckController form for this application.
  * 
  * @author Agadar <https://github.com/Agadar/>
  */
-public class EmbassyCheckerForm extends javax.swing.JFrame
+public class EmbassyCheckForm extends javax.swing.JFrame
 {
     /** The controller this form uses. */
-    private final EmbassyCheckerController controller;
+    private final EmbassyCheckController controller;
     
     /**
      * Creates new form EmbassyCheckerForm
      */
-    public EmbassyCheckerForm()
+    public EmbassyCheckForm()
     {
         initComponents();
-        controller = new EmbassyCheckerController(this);
+        controller = new EmbassyCheckController(this);
     }
 
     /**
@@ -369,14 +369,14 @@ public class EmbassyCheckerForm extends javax.swing.JFrame
             /* Create and display the form */
             java.awt.EventQueue.invokeLater(() -> 
             {
-                new EmbassyCheckerForm().setVisible(true);
+                new EmbassyCheckForm().setVisible(true);
             });
         }
         catch (ClassNotFoundException | InstantiationException |
                 IllegalAccessException |
                 UnsupportedLookAndFeelException ex)
         {
-            Logger.getLogger(EmbassyCheckerForm.class.getName()).
+            Logger.getLogger(EmbassyCheckForm.class.getName()).
                     log(Level.SEVERE, null, ex);
         }
     }

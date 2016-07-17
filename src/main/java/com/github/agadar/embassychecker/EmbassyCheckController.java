@@ -6,14 +6,14 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 /**
- * EmbassyCheckerController class for this program.
+ * EmbassyCheckController class for this program.
  * 
  * @author Agadar <https://github.com/Agadar/>
  */
-public final class EmbassyCheckerController
+public final class EmbassyCheckController
 {   
     /** The form to send updates to. */
-    private final EmbassyCheckerForm Form;
+    private final EmbassyCheckForm Form;
     
     /** The user agent for this program. */
     private final static String UserAgent = "Agadar's Embassy Checker "
@@ -24,7 +24,7 @@ public final class EmbassyCheckerController
      * 
      * @param form the form to communicate with
      */
-    public EmbassyCheckerController(EmbassyCheckerForm form)
+    public EmbassyCheckController(EmbassyCheckForm form)
     {
         // Set User Agent.
         NSAPI.setUserAgent(UserAgent);
