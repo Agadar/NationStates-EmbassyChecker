@@ -69,7 +69,7 @@ public class EmbassyCheckForm extends javax.swing.JFrame
         LabelGitHub = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Agadar's NationStates Embassy Checker");
+        setTitle("Agadar's NationStates Embassy Checker 1.0.0");
         setResizable(false);
 
         BtnStart.setText("Build report");
