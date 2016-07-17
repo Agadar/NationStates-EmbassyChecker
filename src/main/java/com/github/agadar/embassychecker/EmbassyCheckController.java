@@ -74,9 +74,11 @@ public final class EmbassyCheckController
         }
         catch (IllegalArgumentException ex)
         {
-            // If an IllegalArgumentException is thrown, show it in a dialog and return.
+            // If an IllegalArgumentException is thrown, show it in a dialog,
+            // re-enable the tools, and return.
             JOptionPane.showMessageDialog(new JFrame(), ex.getMessage(), 
                 "An Error Occured", JOptionPane.ERROR_MESSAGE);
+            setComponentsEnabled(true);
             return;
         }
         
