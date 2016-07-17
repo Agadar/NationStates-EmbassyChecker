@@ -41,20 +41,30 @@ public class EmbassyCheckQuery
     /** Current time in seconds. */
     private final long Now = System.currentTimeMillis() / 1000;
     
+    /** The controller to report progress back to. */
+    private final EmbassyCheckController controller;
+    
     /**
      * Instantiates a new EmbassyCheckQuery, using the given region name.
      * 
      * @param regionName name of the region whose embassies to check
+     * @param controller the controller to report progress back to
      * @throws IllegalArgumentException if regionName is null or empty
      */
-    public EmbassyCheckQuery(String regionName) throws IllegalArgumentException
+    public EmbassyCheckQuery(String regionName, EmbassyCheckController controller) throws IllegalArgumentException
     {
         if (regionName == null || regionName.isEmpty())
         {
             throw new IllegalArgumentException("No region name supplied!");
         }
         
+        if (controller == null)
+        {
+            throw new RuntimeException("No EmbassyCheckController supplied!");
+        }
+        
         this.RegionName = regionName;
+        this.controller = controller;
         ShardsToRetrieveLst.add(RegionShard.Name);
     }
     
@@ -132,7 +142,7 @@ public class EmbassyCheckQuery
      */
     public String execute() throws IllegalArgumentException
     {
-        // Throw exception if none of the checks was selected
+        // Throw exception if none of the checks was selected.
         if (MaxDaysSinceLastRmbMsg == 0 && MinDaysSinceFounded == 0 &&
             TagsToCheck == null)
         {
@@ -163,10 +173,12 @@ public class EmbassyCheckQuery
         // The retrieved regions.
         final List<Region> regions = new ArrayList<>();
         
+        // Reset progress bar.
+        controller.resetProgressBar(embassyRegions.size());
+        
         // Iterate over retrieved region names, retrieving the regions.
-        //for (final String embassyRegionName : embassyRegions)
-        for (int i = 0; i < 15; i++)
-        {String embassyRegionName = embassyRegions.get(i);
+        for (final String embassyRegionName : embassyRegions)
+        {
             Region region = NSAPI.region(embassyRegionName)
                     .shards(ShardsToRetrieveLst.toArray(new RegionShard[ShardsToRetrieveLst.size()]))
                     .execute();
@@ -177,6 +189,9 @@ public class EmbassyCheckQuery
                 // Add the region to the list.
                 regions.add(region);
             }
+            
+            // Increment progress bar.
+            controller.incrProgressBar();
         }
         
         // The generated report.

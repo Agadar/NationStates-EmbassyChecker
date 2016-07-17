@@ -49,15 +49,15 @@ public final class EmbassyCheckController
             int minDaysSinceFounded, boolean checkRegionTags,
             String[] tagsToCheck)
     {
-        // Disable the GUI components, and clear the textarea.
+        // Disable the GUI components, clear the textarea, reset the progress bar.
         setComponentsEnabled(false);
-        Form.TxtAreaReport.setText("");      
+        Form.TxtAreaReport.setText("");
         EmbassyCheckQuery query;
         
         // Build a new query according to the supplied parameters.
         try
         {
-            query = new EmbassyCheckQuery(mainRegionName);
+            query = new EmbassyCheckQuery(mainRegionName, this);
             
             if (checkRmbActivity)
             {
@@ -138,5 +138,32 @@ public final class EmbassyCheckController
         Form.SpinnerRmbActivity.setEnabled(enabled && Form.ChkbxRmbActivity.isSelected());
         
         Form.TxtFieldTags.setEditable(enabled && Form.ChkbxTags.isSelected());
+    }
+    
+    /**
+     * Resets the progress bar via SwingUtilities.invokeLater(...) using the
+     * given value as maximum. Called via the currently executing query.
+     * 
+     * @param maximum maximum value for the progress bar
+     */
+    public void resetProgressBar(int maximum)
+    {
+        SwingUtilities.invokeLater(() ->
+        {
+            Form.ProgressBar.setValue(0);
+            Form.ProgressBar.setMaximum(maximum);
+        });
+    }
+    
+    /**
+     * Increments the progress bar via SwingUtilities.invokeLater(...) by 1.
+     * Called via the currently executing query.
+     */
+    public void incrProgressBar()
+    {
+        SwingUtilities.invokeLater(() ->
+        {
+            Form.ProgressBar.setValue(Form.ProgressBar.getValue() + 1);
+        });
     }
 }
