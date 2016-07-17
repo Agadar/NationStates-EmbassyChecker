@@ -1,5 +1,9 @@
 package com.github.agadar.embassychecker;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.UIManager;
@@ -14,6 +18,13 @@ public class EmbassyCheckForm extends javax.swing.JFrame
 {
     /** The controller this form uses. */
     private final EmbassyCheckController controller;
+    
+    /** Link to the software author's nation. */
+    private final static String authorNationLink = "http://www.nationstates.net/nation=agadar";
+    
+    /** Link to this software's repository. */
+    private final static String repositoryLink = "https://github.com/Agadar/"
+            + "NationStates-EmbassyChecker";
     
     /**
      * Creates new form EmbassyCheckerForm
@@ -54,9 +65,12 @@ public class EmbassyCheckForm extends javax.swing.JFrame
         TxtAreaReport = new javax.swing.JTextArea();
         PanelProgress = new javax.swing.JPanel();
         ProgressBar = new javax.swing.JProgressBar();
+        LabelNationLink = new javax.swing.JLabel();
+        LabelGitHub = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Agadar's NationStates Embassy Checker");
+        setResizable(false);
 
         BtnStart.setText("Build report");
         BtnStart.addActionListener(new java.awt.event.ActionListener()
@@ -267,6 +281,24 @@ public class EmbassyCheckForm extends javax.swing.JFrame
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        LabelNationLink.setText("<html>Created and maintained by <a href='/'>Agadar</a>.</html>");
+        LabelNationLink.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mouseClicked(java.awt.event.MouseEvent evt)
+            {
+                LabelNationLinkMouseClicked(evt);
+            }
+        });
+
+        LabelGitHub.setText("<html>Source code and downloads can be found at the <a href='/'>GitHub repository</a>.</html>");
+        LabelGitHub.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mouseClicked(java.awt.event.MouseEvent evt)
+            {
+                LabelGitHubMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -283,7 +315,12 @@ public class EmbassyCheckForm extends javax.swing.JFrame
                             .addComponent(PanelRegionAge, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(BtnStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(PanelReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(PanelReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(LabelNationLink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(LabelGitHub, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -302,9 +339,13 @@ public class EmbassyCheckForm extends javax.swing.JFrame
                         .addComponent(PanelTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(BtnStart)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(PanelProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(LabelNationLink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(LabelGitHub, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -374,6 +415,47 @@ public class EmbassyCheckForm extends javax.swing.JFrame
     }//GEN-LAST:event_BtnStartActionPerformed
 
     /**
+     * The credits link for the user. Opens the link.
+     * 
+     * @param evt 
+     */
+    private void LabelNationLinkMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_LabelNationLinkMouseClicked
+    {//GEN-HEADEREND:event_LabelNationLinkMouseClicked
+        tryOpenLink(authorNationLink);
+    }//GEN-LAST:event_LabelNationLinkMouseClicked
+
+    /**
+     * The credits link for the repository. Opens the link.
+     * 
+     * @param evt 
+     */
+    private void LabelGitHubMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_LabelGitHubMouseClicked
+    {//GEN-HEADEREND:event_LabelGitHubMouseClicked
+        tryOpenLink(repositoryLink);
+    }//GEN-LAST:event_LabelGitHubMouseClicked
+
+    /**
+     * Tries opening the given url in the desktop's default browser.
+     * 
+     * @param url the url to browse to
+     */
+    private void tryOpenLink(String url)
+    {
+        if (Desktop.isDesktopSupported())
+        {
+            try
+            {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+            catch (IOException | URISyntaxException ex)
+            {
+                Logger.getLogger(EmbassyCheckForm.class.getName()).
+                        log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    /**
      * Disables the start button if all three checkboxes are unchecked.
      */
     private void MaybeDisableBtnStart()
@@ -413,6 +495,8 @@ public class EmbassyCheckForm extends javax.swing.JFrame
     protected javax.swing.JCheckBox ChkbxRegionAge;
     protected javax.swing.JCheckBox ChkbxRmbActivity;
     protected javax.swing.JCheckBox ChkbxTags;
+    private javax.swing.JLabel LabelGitHub;
+    private javax.swing.JLabel LabelNationLink;
     private javax.swing.JLabel LblRegionAge;
     private javax.swing.JLabel LblRmbActivity;
     private javax.swing.JLabel LblTags;

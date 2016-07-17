@@ -4,6 +4,7 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="Agadar&apos;s NationStates Embassy Checker"/>
+    <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -24,7 +25,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="PanelProgress" max="32767" attributes="0"/>
@@ -38,6 +39,12 @@
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="PanelReport" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
+                      <Component id="LabelNationLink" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="LabelGitHub" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -62,9 +69,14 @@
                       <Component id="BtnStart" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="PanelProgress" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="LabelNationLink" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="LabelGitHub" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -440,5 +452,21 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JLabel" name="LabelNationLink">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;Created and maintained by &lt;a href=&apos;/&apos;&gt;Agadar&lt;/a&gt;.&lt;/html&gt;"/>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="LabelNationLinkMouseClicked"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="LabelGitHub">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;Source code and downloads can be found at the &lt;a href=&apos;/&apos;&gt;GitHub repository&lt;/a&gt;.&lt;/html&gt;"/>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="LabelGitHubMouseClicked"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>
