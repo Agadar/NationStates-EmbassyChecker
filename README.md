@@ -15,3 +15,7 @@ Users can specify the following criteria:
 ## Screenshot
 
 ![Screenshot EmbassyChecker GUI.png](other/Screenshot EmbassyChecker GUI.png)
+
+## Links
+
+[NationStates forum thread](http://forum.nationstates.net/viewtopic.php?f=15&t=384118)
