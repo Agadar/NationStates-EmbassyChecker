@@ -5,7 +5,7 @@
     <!-- General properties -->
     <groupId>com.github.agadar</groupId>
     <artifactId>nationstates-embassychecker</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>NationStates Embassy Checker</name>
     <description>Reports on a specific region's embassy regions that do not meet specified criteria.</description>

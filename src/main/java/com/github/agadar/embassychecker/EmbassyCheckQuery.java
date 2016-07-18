@@ -1,5 +1,8 @@
 package com.github.agadar.embassychecker;
 
+import com.github.agadar.embassychecker.domain.RegionLastMsg;
+import com.github.agadar.embassychecker.domain.RegionWithTags;
+import com.github.agadar.embassychecker.domain.RegionFounded;
 import com.github.agadar.nsapi.NSAPI;
 import com.github.agadar.nsapi.domain.region.Region;
 import com.github.agadar.nsapi.domain.shared.Happening;
@@ -12,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Query for doing an embassies check and returning a report as a String.
- * Modelled slightly after the queries in the NS API Java Wrapper.
+ * Modeled slightly after the queries in the NS API Java Wrapper.
  * 
  * @author Agadar <https://github.com/Agadar/>
  */
