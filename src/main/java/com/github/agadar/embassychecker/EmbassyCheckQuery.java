@@ -183,8 +183,7 @@ public class EmbassyCheckQuery
         final List<String> embassyRegions = new ArrayList<>();
         MainRegion.Embassies.forEach(embassy -> 
         {
-            if (embassy.Status == null || !(embassy.Status.equals("closing") || 
-                embassy.Status.equals("rejected") || embassy.Status.equals("denied")))
+            if (embassy.Status == null || embassy.Status.equals("pending"))
             {
                 embassyRegions.add(embassy.RegionName);
             }
