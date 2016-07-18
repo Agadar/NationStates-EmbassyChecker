@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.github.agadar.embassychecker.event.RegionEventsListener;
+import com.github.agadar.embassychecker.event.RegionRetrievedEvent;
+import com.github.agadar.embassychecker.event.RegionRetrievingStartedEvent;
 
 /**
  * Query for doing an embassies check and returning a report as a String.
@@ -45,6 +47,9 @@ public class EmbassyCheckQuery
     /** Current time in seconds. */
     private final long Now = System.currentTimeMillis() / 1000;
     
+    /** The event listeners for this query. */
+    private final List<RegionEventsListener> listeners = new ArrayList<>();
+    
     /**
      * Instantiates a new EmbassyCheckQuery, using the given region name.
      * 
@@ -62,8 +67,24 @@ public class EmbassyCheckQuery
         ShardsToRetrieveLst.add(RegionShard.Name);
     }
     
-    public synchronized EmbassyCheckQuery addListener(RegionEventsListener listener)
+    /**
+     * Adds new region event listeners to this query.
+     * 
+     * @param newListeners the listeners to add
+     * @return this
+     */
+    public EmbassyCheckQuery addListeners(RegionEventsListener... newListeners)
     {
+        synchronized(listeners)
+        {
+            for (RegionEventsListener listener : newListeners)
+            {
+                if (!listeners.contains(listener))
+                {
+                    listeners.add(listener);
+                }
+            }
+        }      
         return this;
     }
     
@@ -172,25 +193,45 @@ public class EmbassyCheckQuery
         // The retrieved regions.
         final List<Region> regions = new ArrayList<>();
         
-        // Reset progress bar.
-        //controller.resetProgressBar(embassyRegions.size());
+        // Fire RegionRetrievingStartedEvent
+        synchronized(listeners)
+        {
+            final RegionRetrievingStartedEvent event = 
+                    new RegionRetrievingStartedEvent(this, embassyRegions.size());
+            
+            for (RegionEventsListener listener : listeners)
+            {
+                listener.handleRetrievingStarted(event);
+            }
+        }
         
         // Iterate over retrieved region names, retrieving the regions.
-        for (final String embassyRegionName : embassyRegions)
+        for (int i = 0; i < embassyRegions.size(); i++)
         {
-            Region region = NSAPI.region(embassyRegionName)
+            final String embassyRegionName = embassyRegions.get(i);
+            final Region region = NSAPI.region(embassyRegionName)
                     .shards(ShardsToRetrieveLst.toArray(new RegionShard[ShardsToRetrieveLst.size()]))
-                    .execute();
+                    .execute();           
+            boolean Retrieved;
             
             // Null check to make sure the region didn't CTE in the meantime.
-            if (region != null)
+            if (Retrieved = region != null)
             {
                 // Add the region to the list.
                 regions.add(region);
             }
             
-            // Increment progress bar.
-            //controller.incrProgressBar();
+            // Fire RegionRetrievedEvent
+            synchronized(listeners)
+            {
+                final RegionRetrievedEvent event = 
+                        new RegionRetrievedEvent(this, embassyRegionName, i, Retrieved);
+
+                for (RegionEventsListener listener : listeners)
+                {
+                    listener.handleRegionRetrieved(event);
+                }
+            }
         }
         
         // The generated report.

@@ -60,7 +60,7 @@ public final class EmbassyCheckController implements RegionEventsListener
         // Build a new query according to the supplied parameters.
         try
         {
-            query = new EmbassyCheckQuery(mainRegionName);
+            query = new EmbassyCheckQuery(mainRegionName).addListeners(this);
             
             if (checkRmbActivity)
             {
@@ -142,43 +142,23 @@ public final class EmbassyCheckController implements RegionEventsListener
         
         Form.TxtFieldTags.setEditable(enabled && Form.ChkbxTags.isSelected());
     }
-    
-    /**
-     * Resets the progress bar via SwingUtilities.invokeLater(...) using the
-     * given value as maximum. Called via the currently executing query.
-     * 
-     * @param maximum maximum value for the progress bar
-     */
-    public void resetProgressBar(int maximum)
-    {
-        SwingUtilities.invokeLater(() ->
-        {
-            Form.ProgressBar.setValue(0);
-            Form.ProgressBar.setMaximum(maximum);
-        });
-    }
-    
-    /**
-     * Increments the progress bar via SwingUtilities.invokeLater(...) by 1.
-     * Called via the currently executing query.
-     */
-    public void incrProgressBar()
-    {
-        SwingUtilities.invokeLater(() ->
-        {
-            Form.ProgressBar.setValue(Form.ProgressBar.getValue() + 1);
-        });
-    }
 
     @Override
     public void handleRetrievingStarted(RegionRetrievingStartedEvent event)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        SwingUtilities.invokeLater(() ->
+        {
+            Form.ProgressBar.setValue(0);
+            Form.ProgressBar.setMaximum(event.RegionsToRetrieve - 1);
+        });
     }
 
     @Override
     public void handleRegionRetrieved(RegionRetrievedEvent event)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        SwingUtilities.invokeLater(() ->
+        {
+            Form.ProgressBar.setValue(event.PositionInQuery);
+        });
     }
 }
