@@ -1,11 +1,11 @@
 package com.github.agadar.embassychecker.event;
 
 /**
- * Interface for handlers of region events.
+ * Interface for listeners to region events.
  * 
  * @author marti
  */
-public interface RegionEventsHandler
+public interface RegionEventsListener
 {
     /**
      * Handler for when the regions retrieval process has begun.

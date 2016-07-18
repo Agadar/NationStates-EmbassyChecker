@@ -1,16 +1,19 @@
 package com.github.agadar.embassychecker;
 
+import com.github.agadar.embassychecker.event.RegionRetrievedEvent;
+import com.github.agadar.embassychecker.event.RegionRetrievingStartedEvent;
 import com.github.agadar.nsapi.NSAPI;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import com.github.agadar.embassychecker.event.RegionEventsListener;
 
 /**
  * EmbassyCheckController class for this program.
  * 
  * @author Agadar <https://github.com/Agadar/>
  */
-public final class EmbassyCheckController
+public final class EmbassyCheckController implements RegionEventsListener
 {   
     /** The form to send updates to. */
     private final EmbassyCheckForm Form;
@@ -57,7 +60,7 @@ public final class EmbassyCheckController
         // Build a new query according to the supplied parameters.
         try
         {
-            query = new EmbassyCheckQuery(mainRegionName, this);
+            query = new EmbassyCheckQuery(mainRegionName);
             
             if (checkRmbActivity)
             {
@@ -165,5 +168,17 @@ public final class EmbassyCheckController
         {
             Form.ProgressBar.setValue(Form.ProgressBar.getValue() + 1);
         });
+    }
+
+    @Override
+    public void handleRetrievingStarted(RegionRetrievingStartedEvent event)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void handleRegionRetrieved(RegionRetrievedEvent event)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

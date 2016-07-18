@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import com.github.agadar.embassychecker.event.RegionEventsListener;
 
 /**
  * Query for doing an embassies check and returning a report as a String.
@@ -44,31 +45,26 @@ public class EmbassyCheckQuery
     /** Current time in seconds. */
     private final long Now = System.currentTimeMillis() / 1000;
     
-    /** The controller to report progress back to. */
-    private final EmbassyCheckController controller;
-    
     /**
      * Instantiates a new EmbassyCheckQuery, using the given region name.
      * 
      * @param regionName name of the region whose embassies to check
-     * @param controller the controller to report progress back to
      * @throws IllegalArgumentException if regionName is null or empty
      */
-    public EmbassyCheckQuery(String regionName, EmbassyCheckController controller) throws IllegalArgumentException
+    public EmbassyCheckQuery(String regionName) throws IllegalArgumentException
     {
         if (regionName == null || regionName.isEmpty())
         {
             throw new IllegalArgumentException("No region name supplied!");
         }
         
-        if (controller == null)
-        {
-            throw new RuntimeException("No EmbassyCheckController supplied!");
-        }
-        
         this.RegionName = regionName;
-        this.controller = controller;
         ShardsToRetrieveLst.add(RegionShard.Name);
+    }
+    
+    public synchronized EmbassyCheckQuery addListener(RegionEventsListener listener)
+    {
+        return this;
     }
     
     /**
@@ -177,7 +173,7 @@ public class EmbassyCheckQuery
         final List<Region> regions = new ArrayList<>();
         
         // Reset progress bar.
-        controller.resetProgressBar(embassyRegions.size());
+        //controller.resetProgressBar(embassyRegions.size());
         
         // Iterate over retrieved region names, retrieving the regions.
         for (final String embassyRegionName : embassyRegions)
@@ -194,7 +190,7 @@ public class EmbassyCheckQuery
             }
             
             // Increment progress bar.
-            controller.incrProgressBar();
+            //controller.incrProgressBar();
         }
         
         // The generated report.
