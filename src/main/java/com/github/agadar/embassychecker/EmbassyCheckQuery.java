@@ -1,20 +1,19 @@
 package com.github.agadar.embassychecker;
 
+import com.github.agadar.embassychecker.domain.RegionFounded;
 import com.github.agadar.embassychecker.domain.RegionLastMsg;
 import com.github.agadar.embassychecker.domain.RegionWithTags;
-import com.github.agadar.embassychecker.domain.RegionFounded;
+import com.github.agadar.embassychecker.event.RegionEventsListener;
+import com.github.agadar.embassychecker.event.RegionRetrievedEvent;
+import com.github.agadar.embassychecker.event.RegionRetrievingStartedEvent;
 import com.github.agadar.nsapi.NSAPI;
 import com.github.agadar.nsapi.domain.region.Region;
-import com.github.agadar.nsapi.domain.shared.Happening;
 import com.github.agadar.nsapi.enums.shard.RegionShard;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.github.agadar.embassychecker.event.RegionEventsListener;
-import com.github.agadar.embassychecker.event.RegionRetrievedEvent;
-import com.github.agadar.embassychecker.event.RegionRetrievingStartedEvent;
 
 /**
  * Query for doing an embassies check and returning a report as a String.
@@ -129,7 +128,7 @@ public class EmbassyCheckQuery
         }
         
         MinDaysSinceFounded = days;
-        ShardsToRetrieveLst.add(RegionShard.History);
+        ShardsToRetrieveLst.add(RegionShard.FoundedTime);
         return this;
     }
     
@@ -315,24 +314,15 @@ public class EmbassyCheckQuery
         // Iterate over the regions, doing the check.
         for (Region region : regions)
         {       
-            // Null/empty check on retrieved messages.
-            if (region.History == null || region.History.isEmpty())
+            // If the region was never founded (it's a game-created region), continue.
+            if (region.FoundedTime == 0)
             {
                 continue;
             }
             
-            // Check if the very last item is the 'founded' message. If not, continue.
-            final Happening lastHapp = region.History.get(region.History.size() - 1);
-            
-            if (!lastHapp.Description.contains("Region founded by "))
-            {
-                continue;
-            }
-
             // Check whether the time between now and when the region was founded
             // is less than the minMsSinceFounded. If so, add to regionFoundeds.
-            final long foundedTimeStamp = lastHapp.Timestamp;
-            final long diff = Now - foundedTimeStamp;
+            final long diff = Now - region.FoundedTime;
 
             if (diff < TimeUnit.DAYS.toSeconds(MinDaysSinceFounded))
             {
