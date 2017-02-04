@@ -3,7 +3,7 @@
 <Form version="1.5" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
-    <Property name="title" type="java.lang.String" value="Agadar&apos;s NationStates Embassy Checker 1.0.0"/>
+    <Property name="title" type="java.lang.String" value="Agadar&apos;s NationStates Embassy Checker 1.1.0"/>
     <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
@@ -97,7 +97,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Log regions with inactive messageboards"/>
+            <TitledBorder title="Log regions with inactive messageboards">
+              <Font PropertyName="font" name="Dialog" size="11" style="1"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -169,7 +171,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Log regions younger than specified days"/>
+            <TitledBorder title="Log regions younger than specified days">
+              <Font PropertyName="font" name="Dialog" size="11" style="1"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -244,7 +248,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Region whose embassy regions to report on"/>
+            <TitledBorder title="Region whose embassy regions to report on">
+              <Font PropertyName="font" name="Dialog" size="11" style="1"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -284,7 +290,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Log regions with specified tags"/>
+            <TitledBorder title="Log regions with specified tags">
+              <Font PropertyName="font" name="Dialog" size="11" style="1"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -357,7 +365,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Report (copypaste to notepad for easier reading)"/>
+            <TitledBorder title="Report (copypaste to notepad for easier reading)">
+              <Font PropertyName="font" name="Dialog" size="11" style="1"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -410,7 +420,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Progress"/>
+            <TitledBorder title="Progress">
+              <Font PropertyName="font" name="Dialog" size="11" style="1"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>

@@ -7,20 +7,21 @@ import java.util.EventObject;
  *
  * @author Agadar
  */
-public class RegionRetrievingStartedEvent extends EventObject
-{
-    /** The total number of regions to retrieve. */
-    public final int RegionsToRetrieve;
-    
+public class RegionRetrievingStartedEvent extends EventObject {
+
+    /**
+     * The total number of regions to retrieve.
+     */
+    public final int regionsToRetrieve;
+
     /**
      * Constructs a new event.
-     * 
+     *
      * @param source object that fired this event
      * @param regionsToRetrieve total number of regions to retrieve
      */
-    public RegionRetrievingStartedEvent(Object source, int regionsToRetrieve)
-    {
+    public RegionRetrievingStartedEvent(Object source, int regionsToRetrieve) {
         super(source);
-        this.RegionsToRetrieve = regionsToRetrieve;
+        this.regionsToRetrieve = regionsToRetrieve;
     }
 }
