@@ -14,7 +14,7 @@ Users can specify the following criteria:
 
 ## Screenshot
 
-![Screenshot EmbassyChecker GUI.png](other/Screenshot EmbassyChecker GUI.png)
+![Screenshot](https://github.com/Agadar/NationStates-EmbassyChecker/blob/master/other/Screenshot%20EmbassyChecker%20GUI.png)
 
 ## Links
 
