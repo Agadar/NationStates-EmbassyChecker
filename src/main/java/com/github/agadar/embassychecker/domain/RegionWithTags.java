@@ -1,7 +1,9 @@
 package com.github.agadar.embassychecker.domain;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import com.github.agadar.nationstates.enumerator.RegionTag;
-import java.util.List;
 
 /**
  * A region name with the specified tags it has.
@@ -18,16 +20,16 @@ public final class RegionWithTags implements Comparable<RegionWithTags> {
     /**
      * The specified tags this region has.
      */
-    public final List<RegionTag> tags;
+    public final Collection<RegionTag> tags;
 
     /**
      * Constructor.
      *
      * @param region name of the region
-     * @param tags the specified tags this region has. Should contain at least
-     * one entry.
+     * @param tags   the specified tags this region has. Should contain at least one
+     *               entry.
      */
-    public RegionWithTags(String region, List<RegionTag> tags) {
+    public RegionWithTags(String region, Collection<RegionTag> tags) {
         this.region = region;
         this.tags = tags;
     }
@@ -39,13 +41,7 @@ public final class RegionWithTags implements Comparable<RegionWithTags> {
 
     @Override
     public String toString() {
-        String help = String.format("Region: %s; Tags: %s", region, tags.get(0));
-
-        for (int i = 1; i < tags.size(); i++) {
-            help += ", " + tags.get(i).toString();
-        }
-
-        return help + ".";
+        String tagsText = tags.stream().map(tag -> tag.toString()).collect(Collectors.joining(", "));
+        return String.format("Region: %s; Tags: %s.", region, tagsText);
     }
-
 }

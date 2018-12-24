@@ -3,7 +3,7 @@ package com.github.agadar.embassychecker;
 import com.github.agadar.embassychecker.event.RegionRetrievedEvent;
 import com.github.agadar.embassychecker.event.RegionRetrievingStartedEvent;
 import com.github.agadar.embassychecker.event.RegionEventsListener;
-
+import com.github.agadar.nationstates.DefaultNationStatesImpl;
 import com.github.agadar.nationstates.NationStates;
 import com.github.agadar.nationstates.enumerator.RegionTag;
 
@@ -18,10 +18,8 @@ import javax.swing.SwingUtilities;
  */
 public final class EmbassyCheckController implements RegionEventsListener {
 
-    /**
-     * The form to send updates to.
-     */
     private final EmbassyCheckForm form;
+    private final NationStates nationStates;
 
     /**
      * The user agent for this program.
@@ -35,10 +33,7 @@ public final class EmbassyCheckController implements RegionEventsListener {
      * @param form the form to communicate with
      */
     public EmbassyCheckController(EmbassyCheckForm form) {
-        // Set User Agent.
-        NationStates.setUserAgent(USER_AGENT);
-
-        // Set form.
+        nationStates = new DefaultNationStatesImpl(USER_AGENT);
         this.form = form;
     }
 
@@ -64,7 +59,7 @@ public final class EmbassyCheckController implements RegionEventsListener {
 
         // Build a new query according to the supplied parameters.
         try {
-            query = new EmbassyCheckQuery(mainRegionName).addListeners(this);
+            query = new EmbassyCheckQuery(nationStates, mainRegionName).addListeners(this);
 
             if (checkRmbActivity) {
                 query = query.rmbActivity(maxDaysSinceLastRmbMsg);

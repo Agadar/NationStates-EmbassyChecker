@@ -27,14 +27,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class EmbassyCheckQuery {
 
+    private final NationStates nationStates;
+
     /**
      * Name of the region whose embassy regions to check.
      */
     private final String regionName;
 
     /**
-     * The maximum number of days since the last message on a region's message
-     * board before that region is considered inactive.
+     * The maximum number of days since the last message on a region's message board
+     * before that region is considered inactive.
      */
     private int maxDaysSinceLastRmbMsg;
 
@@ -69,11 +71,12 @@ public class EmbassyCheckQuery {
      * @param regionName name of the region whose embassies to check
      * @throws IllegalArgumentException if regionName is null or empty
      */
-    public EmbassyCheckQuery(String regionName) throws IllegalArgumentException {
+    public EmbassyCheckQuery(NationStates nationStates, String regionName) {
         if (regionName == null || regionName.isEmpty()) {
             throw new IllegalArgumentException("No region name supplied!");
         }
 
+        this.nationStates = nationStates;
         this.regionName = regionName;
         shardsToRetrieveLst.add(RegionShard.NAME);
     }
@@ -96,10 +99,9 @@ public class EmbassyCheckQuery {
     }
 
     /**
-     * Makes this query check the RMB activity of each embassy region of the
-     * chosen region. Any region which has not had a new RMB message posted
-     * between now and the given number of days ago will be included in the
-     * report.
+     * Makes this query check the RMB activity of each embassy region of the chosen
+     * region. Any region which has not had a new RMB message posted between now and
+     * the given number of days ago will be included in the report.
      *
      * @param days maximum number of days since a region's last RMB activity
      * @return this
@@ -107,8 +109,7 @@ public class EmbassyCheckQuery {
      */
     public EmbassyCheckQuery rmbActivity(int days) throws IllegalArgumentException {
         if (days <= 0) {
-            throw new IllegalArgumentException("The maximum days of no RMB posts"
-                    + " must be greater than 0!");
+            throw new IllegalArgumentException("The maximum days of no RMB posts" + " must be greater than 0!");
         }
 
         maxDaysSinceLastRmbMsg = days;
@@ -117,9 +118,9 @@ public class EmbassyCheckQuery {
     }
 
     /**
-     * Makes this query check the age of each embassy region of the chosen
-     * region. Any region which has not existed for longer than the given number
-     * of days will be included in the report.
+     * Makes this query check the age of each embassy region of the chosen region.
+     * Any region which has not existed for longer than the given number of days
+     * will be included in the report.
      *
      * @param days minimum number of days a region must have existed
      * @return this
@@ -127,8 +128,7 @@ public class EmbassyCheckQuery {
      */
     public EmbassyCheckQuery minimumAge(int days) throws IllegalArgumentException {
         if (days <= 0) {
-            throw new IllegalArgumentException("The minimum age of region in days"
-                    + " must be greater than 0!");
+            throw new IllegalArgumentException("The minimum age of region in days" + " must be greater than 0!");
         }
 
         minDaysSinceFounded = days;
@@ -137,9 +137,8 @@ public class EmbassyCheckQuery {
     }
 
     /**
-     * Makes this query check the tags of each embassy region of the chosen
-     * region. Any region that has one or more of these tags will be included in
-     * the report.
+     * Makes this query check the tags of each embassy region of the chosen region.
+     * Any region that has one or more of these tags will be included in the report.
      *
      * @param tags the tags to look for
      * @return this
@@ -163,13 +162,12 @@ public class EmbassyCheckQuery {
      */
     public String execute() throws IllegalArgumentException {
         // Throw exception if none of the checks was selected.
-        if (maxDaysSinceLastRmbMsg == 0 && minDaysSinceFounded == 0
-                && tagsToCheck == null) {
+        if (maxDaysSinceLastRmbMsg == 0 && minDaysSinceFounded == 0 && tagsToCheck == null) {
             throw new IllegalArgumentException("None of the checks is selected!");
         }
 
         // Retrieve embassies of the specified region.
-        final Region MainRegion = NationStates.region(regionName).shards(RegionShard.EMBASSIES).execute();
+        Region MainRegion = nationStates.getRegion(regionName).shards(RegionShard.EMBASSIES).execute();
 
         // Null-check on the region.
         if (MainRegion == null) {
@@ -179,9 +177,9 @@ public class EmbassyCheckQuery {
         // Extract all region names from embassies that are established or pending,
         // because we don't care about other embassies.
         final List<String> embassyRegions = new ArrayList<>();
-        MainRegion.embassies.forEach(embassy -> {
-            if (embassy.status == EmbassyStatus.ESTABLISHED || embassy.status == EmbassyStatus.PENDING) {
-                embassyRegions.add(embassy.regionName);
+        MainRegion.getEmbassies().forEach(embassy -> {
+            if (embassy.getStatus() == EmbassyStatus.ESTABLISHED || embassy.getStatus() == EmbassyStatus.PENDING) {
+                embassyRegions.add(embassy.getRegionName());
             }
         });
 
@@ -190,8 +188,7 @@ public class EmbassyCheckQuery {
 
         // Fire RegionRetrievingStartedEvent
         synchronized (listeners) {
-            final RegionRetrievingStartedEvent event
-                    = new RegionRetrievingStartedEvent(this, embassyRegions.size());
+            final RegionRetrievingStartedEvent event = new RegionRetrievingStartedEvent(this, embassyRegions.size());
 
             listeners.stream().forEach((listener) -> {
                 listener.handleRetrievingStarted(event);
@@ -201,9 +198,8 @@ public class EmbassyCheckQuery {
         // Iterate over retrieved region names, retrieving the regions.
         for (int i = 0; i < embassyRegions.size(); i++) {
             final String embassyRegionName = embassyRegions.get(i);
-            final Region region = NationStates.region(embassyRegionName)
-                    .shards(shardsToRetrieveLst.toArray(new RegionShard[shardsToRetrieveLst.size()]))
-                    .execute();
+            final Region region = nationStates.getRegion(embassyRegionName)
+                    .shards(shardsToRetrieveLst.toArray(new RegionShard[shardsToRetrieveLst.size()])).execute();
             boolean Retrieved;
 
             // Null check to make sure the region didn't CTE in the meantime.
@@ -214,8 +210,7 @@ public class EmbassyCheckQuery {
 
             // Fire RegionRetrievedEvent
             synchronized (listeners) {
-                final RegionRetrievedEvent event
-                        = new RegionRetrievedEvent(this, embassyRegionName, i, Retrieved);
+                final RegionRetrievedEvent event = new RegionRetrievedEvent(this, embassyRegionName, i, Retrieved);
 
                 listeners.stream().forEach((listener) -> {
                     listener.handleRegionRetrieved(event);
@@ -257,26 +252,25 @@ public class EmbassyCheckQuery {
         // Iterate over the regions, doing the check.
         for (Region region : regions) {
             // Null/empty check on retrieved messages.
-            if (region.regionalMessages == null || region.regionalMessages.isEmpty()) {
-                regionLastMsgs.add(new RegionLastMsg(region.name));
+            if (region.getRegionalMessages() == null || region.getRegionalMessages().isEmpty()) {
+                regionLastMsgs.add(new RegionLastMsg(region.getName()));
                 continue;
             }
 
             // Check whether the time between now and when the last posted RMB
             // message is more than the maxMsSinceLastRmbMsg. If so, add to regionLastMsgs.
-            final long msgTimeStamp = region.regionalMessages.get(region.regionalMessages
-                    .size() - 1).timestamp;
+            final long msgTimeStamp = region.getRegionalMessages().get(region.getRegionalMessages().size() - 1).getTimestamp();
             final long diff = now - msgTimeStamp;
 
             if (diff >= TimeUnit.DAYS.toSeconds(maxDaysSinceLastRmbMsg)) {
-                regionLastMsgs.add(new RegionLastMsg(region.name, diff));
+                regionLastMsgs.add(new RegionLastMsg(region.getName(), diff));
             }
         }
 
         // Now sort the list and return it.
         Collections.sort(regionLastMsgs);
-        String generatedReport = "-------Regions without new RMB messages "
-                + "during the last " + maxDaysSinceLastRmbMsg + " days-------%n";
+        String generatedReport = "-------Regions without new RMB messages " + "during the last "
+                + maxDaysSinceLastRmbMsg + " days-------%n";
         generatedReport += "Total regions found: " + regionLastMsgs.size() + ".%n";
         generatedReport = regionLastMsgs.stream().map((rlm) -> rlm + "%n").reduce(generatedReport, String::concat);
         return generatedReport;
@@ -292,19 +286,19 @@ public class EmbassyCheckQuery {
         final List<RegionFounded> regionFoundeds = new ArrayList<>();
 
         // Iterate over the regions, doing the check.
-        regions.stream().filter((region) -> !(region.founded == 0)).forEach((region) -> {
+        regions.stream().filter((region) -> !(region.getFounded() == 0)).forEach((region) -> {
             // Check whether the time between now and when the region was founded
             // is less than the minMsSinceFounded. If so, add to regionFoundeds.
-            final long diff = now - region.founded;
+            final long diff = now - region.getFounded();
             if (diff < TimeUnit.DAYS.toSeconds(minDaysSinceFounded)) {
-                regionFoundeds.add(new RegionFounded(region.name, diff));
+                regionFoundeds.add(new RegionFounded(region.getName(), diff));
             }
         });
 
         // Now sort the list and return it.
         Collections.sort(regionFoundeds);
-        String generatedReport = "-------Regions that were founded less than "
-                + minDaysSinceFounded + " days ago-------%n";
+        String generatedReport = "-------Regions that were founded less than " + minDaysSinceFounded
+                + " days ago-------%n";
         generatedReport += "Total regions found: " + regionFoundeds.size() + ".%n";
         generatedReport = regionFoundeds.stream().map((rf) -> rf + "%n").reduce(generatedReport, String::concat);
         return generatedReport;
@@ -323,24 +317,24 @@ public class EmbassyCheckQuery {
         final List<RegionTag> TagsToCheckLst = Arrays.asList(tagsToCheck);
 
         // Iterate over the regions, doing the check.
-        regions.stream().filter((region) -> !(region.tags == null || region.tags.isEmpty())).forEach((region) -> {
+        regions.stream().filter((region) -> !(region.getTags() == null || region.getTags().isEmpty())).forEach((region) -> {
             // Found tags in this region's tags.
             final List<RegionTag> foundTags = new ArrayList<>();
-            // For each tag to check, check if the region has it. If so, add it to foundTags.
-            TagsToCheckLst.stream().filter((tagToCheck) -> (region.tags.contains(tagToCheck))).forEach((tagToCheck) -> {
+            // For each tag to check, check if the region has it. If so, add it to
+            // foundTags.
+            TagsToCheckLst.stream().filter((tagToCheck) -> (region.getTags().contains(tagToCheck))).forEach((tagToCheck) -> {
                 foundTags.add(tagToCheck);
             });
 
             // If any of the specified tags were found, create an entry in regionsWithTags.
             if (foundTags.size() > 0) {
-                regionsWithTags.add(new RegionWithTags(region.name, foundTags));
+                regionsWithTags.add(new RegionWithTags(region.getName(), foundTags));
             }
         });
 
         // Now sort the list and return it.
         Collections.sort(regionsWithTags);
-        String generatedReport = "-------Regions with one or more of the "
-                + "specified tags-------%n";
+        String generatedReport = "-------Regions with one or more of the " + "specified tags-------%n";
         generatedReport += "Total regions found: " + regionsWithTags.size() + ".%n";
         generatedReport = regionsWithTags.stream().map((rwt) -> rwt + "%n").reduce(generatedReport, String::concat);
         return generatedReport;
